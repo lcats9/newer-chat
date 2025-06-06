@@ -512,43 +512,35 @@
         }
 
         async function makeAPICallWithCorsfix(url, options) {
-            try {
-                showStatus('Using Corsfix professional service (domain validation)...', 'info');
-                
-                // Corsfix endpoint for paid service with domain validation
-                const corsURL = `https://corsfix.com/api/cors`;
-                
-                const corsRequestBody = {
-                    url: url,
-                    method: options.method || 'GET',
-                    headers: options.headers || {},
-                    body: options.body || null
-                };
-                
-                const response = await fetch(corsURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(corsRequestBody)
-                });
+        try {
+          showStatus(
+            "Using Corsfix professional service (domain validation)...",
+            "info"
+          );
 
-                if (!response.ok) {
-                    if (response.status === 403) {
-                        throw new Error(`Domain not authorized. Verify https://lcats9.github.io is in your Corsfix allowed origins.`);
-                    }
-                    if (response.status === 402) {
-                        throw new Error('Payment required. Check your Corsfix subscription status.');
-                    }
-                    throw new Error(`Corsfix error: ${response.status} - ${response.statusText}`);
-                }
+          const response = await fetch(`https://proxy.corsfix.com/?${url}`, {
+            method: options.method || "GET",
+            headers: {
+              ...options.headers,
+              "x-corsfix-headers": JSON.stringify({
+                Origin: "",
+              }),
+            },
+            body: JSON.stringify(options.body || null),
+          });
 
-                return response;
-            } catch (error) {
-                showStatus(`Corsfix service error: ${error.message}`, 'error');
-                throw error;
-            }
+          if (!response.ok) {
+            throw new Error(
+              `Corsfix error: ${response.status} - ${response.statusText}`
+            );
+          }
+
+          return response;
+        } catch (error) {
+          showStatus(`Corsfix service error: ${error.message}`, "error");
+          throw error;
         }
+      }
 
         async function makeClaudeRequest(userMessage, systemPrompt) {
             const claudeKey = document.getElementById('claudeKey').value;
