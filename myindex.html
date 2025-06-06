@@ -511,36 +511,35 @@
             showStatus('Stopped listening', 'info');
         }
 
-        async function makeAPICallWithCorsfix(url, options) {
-        try {
-          showStatus(
-            "Using Corsfix professional service (domain validation)...",
-            "info"
-          );
+        
+async function makeAPICallWithCorsfix(url, options) {
+  try {
+    showStatus(
+      "Using Corsfix professional service (domain validation)...",
+      "info"
+    );
 
-          const response = await fetch(`https://proxy.corsfix.com/?${url}`, {
-            method: options.method || "GET",
-            headers: {
-              ...options.headers,
-              "x-corsfix-headers": JSON.stringify({
-                Origin: "",
-              }),
-            },
-            body: JSON.stringify(options.body || null),
-          });
+    const response = await fetch(`https://proxy.corsfix.com/?${url}`, {
+      method: options.method || "GET",
+      headers: {
+        ...options.headers,
+        "x-corsfix-headers": JSON.stringify({
+          Origin: "",
+        }),
+      },
+      body: options.body || null,
+    });
 
-          if (!response.ok) {
-            throw new Error(
-              `Corsfix error: ${response.status} - ${response.statusText}`
-            );
-          }
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${await response.text()}`);
+    }
 
-          return response;
-        } catch (error) {
-          showStatus(`Corsfix service error: ${error.message}`, "error");
-          throw error;
-        }
-      }
+    return response;
+  } catch (error) {
+    showStatus(`Corsfix service error: ${error.message}`, "error");
+    throw error;
+  }
+}
 
         async function makeClaudeRequest(userMessage, systemPrompt) {
             const claudeKey = document.getElementById('claudeKey').value;
