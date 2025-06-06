@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude Roleplay with Integrated Coach - Corsfix</title>
+    <title>Claude Roleplay with Integrated Coach - Free CORS</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -163,7 +163,7 @@
             max-width: 300px;
         }
         
-        .corsfix-info {
+        .free-cors-info {
             background: #e8f5e8;
             border: 1px solid #4caf50;
             border-radius: 8px;
@@ -217,10 +217,10 @@
     <div class="container">
         <h1>🎭 Claude Roleplay with Integrated Coach</h1>
         
-        <div class="corsfix-info">
-            <h3>✅ Now Using Corsfix Professional CORS Service!</h3>
-            <p><strong>Setup:</strong> Go to <a href="https://corsfix.com" target="_blank">corsfix.com</a> → Sign up free → Add your GitHub Pages domain to allowed origins</p>
-            <p><strong>Your GitHub Pages domain to whitelist:</strong> <span id="currentDomain" style="font-family: monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;"></span></p>
+        <div class="free-cors-info">
+            <h3>✅ Using Corsfix Professional Service!</h3>
+            <p>Domain validation service - your domain <strong>https://lcats9.github.io</strong> is whitelisted.</p>
+            <p>No API key needed - Corsfix validates by domain automatically.</p>
         </div>
         
         <div class="api-setup">
@@ -513,9 +513,9 @@
 
         async function makeAPICallWithCorsfix(url, options) {
             try {
-                showStatus('Using Corsfix professional service...', 'info');
+                showStatus('Using Corsfix professional service (domain validation)...', 'info');
                 
-                // Corsfix endpoint (no API key needed - uses domain validation)
+                // Corsfix endpoint for paid service with domain validation
                 const corsURL = `https://corsfix.com/api/cors`;
                 
                 const corsRequestBody = {
@@ -535,7 +535,10 @@
 
                 if (!response.ok) {
                     if (response.status === 403) {
-                        throw new Error(`Domain not whitelisted. Add ${window.location.origin} to your Corsfix allowed origins.`);
+                        throw new Error(`Domain not authorized. Verify https://lcats9.github.io is in your Corsfix allowed origins.`);
+                    }
+                    if (response.status === 402) {
+                        throw new Error('Payment required. Check your Corsfix subscription status.');
                     }
                     throw new Error(`Corsfix error: ${response.status} - ${response.statusText}`);
                 }
@@ -669,15 +672,16 @@
 
         async function testConnection() {
             const claudeKey = document.getElementById('claudeKey').value;
+            
             if (!claudeKey) {
                 showStatus('Please enter Claude API key first', 'error');
                 return;
             }
             
-            showStatus('Testing Corsfix service (domain validation)...', 'info');
+            showStatus('Testing Corsfix professional service (domain validation)...', 'info');
             
             try {
-                const claudeResponse = await makeClaudeRequest('Hello, respond with just "Corsfix domain validation successful"', 'Respond briefly.');
+                const claudeResponse = await makeClaudeRequest('Hello, respond with just "Corsfix professional test successful"', 'Respond briefly.');
                 
                 if (claudeResponse) {
                     showStatus('✅ Corsfix + Claude API working perfectly!', 'success');
@@ -689,7 +693,7 @@
                     try {
                         const audioBlob = await makeElevenLabsRequest('Corsfix test successful', false);
                         if (audioBlob) {
-                            showStatus('✅ All APIs working with Corsfix!', 'success');
+                            showStatus('✅ All APIs working with Corsfix professional!', 'success');
                         }
                     } catch (voiceError) {
                         showStatus(`Claude works via Corsfix, but ElevenLabs failed: ${voiceError.message}`, 'error');
@@ -716,7 +720,7 @@
             }
 
             const scenario = document.getElementById('scenario').value;
-            showStatus('Sending message via Corsfix...', 'info');
+            showStatus('Sending message via Corsfix professional service...', 'info');
             addMessage(userInput, true);
 
             try {
@@ -803,12 +807,6 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Show current domain for Corsfix whitelisting
-            const domainElement = document.getElementById('currentDomain');
-            if (domainElement) {
-                domainElement.textContent = window.location.origin;
-            }
-            
             const speechAvailable = initializeSpeechRecognition();
             
             // Character voice selection
@@ -853,7 +851,7 @@
                 const speechBtn = document.getElementById('speechBtn');
                 if (speechBtn) speechBtn.disabled = true;
             } else {
-                showStatus('Ready! Make sure to whitelist your domain at corsfix.com for professional CORS service.', 'info');
+                showStatus('Ready! Using Corsfix professional service with domain validation.', 'info');
             }
         });
     </script>
