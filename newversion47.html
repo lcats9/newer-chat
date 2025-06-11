@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-Only Difficult Conversations Training</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .setup-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .setup-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .voice-interface {
+            display: none;
+            text-align: center;
+        }
+
+        .voice-interface.active {
+            display: block;
+        }
+
+        .conversation-display {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 300px;
+            border: 2px solid #e0e0e0;
+            text-align: left;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+        }
+
+        .message.user {
+            background: #e3f2fd;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.ac {
+            background: #ffebee;
+            margin-right: auto;
+        }
+
+        .message.coach {
+            background: #e8f5e8;
+            margin-right: auto;
+            border-left: 4px solid #4caf50;
+        }
+
+        .message .role {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .message.user .role {
+            color: #1976d2;
+        }
+
+        .message.ac .role {
+            color: #d32f2f;
+        }
+
+        .message.coach .role {
+            color: #388e3c;
+        }
+
+        .voice-control {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px;
+            position: relative;
+        }
+
+        .voice-control:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .voice-control.recording {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-control.processing {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            animation: spin 2s linear infinite;
+        }
+
+        .voice-control.speaking {
+            background: linear-gradient(135deg, #28a745, #218838);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .status.info {
+            background: #f0f8ff;
+            border-color: #b3d9ff;
+            color: #0066cc;
+        }
+
+        .status.error {
+            background: #fff0f0;
+            border-color: #ffb3b3;
+            color: #cc0000;
+        }
+
+        .status.success {
+            background: #f0fff0;
+            border-color: #b3ffb3;
+            color: #006600;
+        }
+
+        .scenario-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .conversation-stage {
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
+            font-size: 1.2em;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .instructions {
+            background: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .setup-section select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .setup-section select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .scenario-designer {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px dashed #667eea;
+        }
+
+        .template-notice {
+            background: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #0066cc;
+        }
+
+        .voice-level {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .voice-level-bar {
+            height: 100%;
+            background: linear-gradient(to right, #4caf50, #8bc34a, #ffeb3b, #ff9800, #f44336);
+            width: 0%;
+            transition: width 0.1s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 Voice Conversations Training</h1>
+            <p>Practice difficult conversations using only voice interaction</p>
+        </div>
+
+        <!-- Setup Section -->
+        <div class="setup-section" id="setup">
+            <h3>🔧 Setup Your Voice Training</h3>
+            
+            <!-- Personal Info -->
+            <div class="input-group">
+                <label for="userName">Your Name:</label>
+                <input type="text" id="userName" placeholder="Enter your real name">
+            </div>
+
+            <!-- API Configuration -->
+            <div class="input-group">
+                <label for="claudeApiKey">Claude API Key:</label>
+                <input type="password" id="claudeApiKey" placeholder="sk-ant-...">
+            </div>
+
+            <div class="input-group">
+                <label for="openaiApiKey">OpenAI API Key (for Whisper speech-to-text):</label>
+                <input type="password" id="openaiApiKey" placeholder="sk-...">
+            </div>
+
+            <div class="input-group">
+                <label for="elevenLabsApiKey">Eleven Labs API Key:</label>
+                <input type="password" id="elevenLabsApiKey" placeholder="Your Eleven Labs key">
+            </div>
+
+            <div class="input-group">
+                <label for="acVoiceId">AC Voice ID (Eleven Labs):</label>
+                <input type="text" id="acVoiceId" placeholder="Voice ID for Activated Character">
+            </div>
+
+            <div class="input-group">
+                <label for="coachVoiceId">Coach Voice ID (Eleven Labs):</label>
+                <input type="text" id="coachVoiceId" placeholder="Voice ID for Coach">
+            </div>
+
+            <hr style="margin: 20px 0; border: 1px solid #e0e0e0;">
+            
+            <!-- Scenario Designer -->
+            <h3 style="color: #667eea; margin-bottom: 15px;">🎭 Design Your Scenario</h3>
+            
+            <div class="input-group">
+                <label for="scenarioTemplate">Quick Templates:</label>
+                <select id="scenarioTemplate" onchange="loadScenarioTemplate()">
+                    <option value="">-- Choose a template or create custom --</option>
+                    <option value="college-roommate">College Friends - Roommate Issues (Angry/Defensive)</option>
+                    <option value="spouses-dinner">Spouses - Dinner Disagreement (Passive-Aggressive)</option>
+                    <option value="coworkers-schedule">Coworkers - Schedule Dispute (Needy/Dependent)</option>
+                    <option value="siblings-chores">Siblings - Household Responsibilities (Victim Mentality)</option>
+                    <option value="friends-money">Friends - Money Issues (Deflecting/Blaming)</option>
+                    <option value="manager-employee">Manager & Employee - Workload (Rigid/Defensive)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="relationshipType">Relationship Type:</label>
+                <input type="text" id="relationshipType" placeholder="e.g., college friends, spouses, coworkers, siblings">
+            </div>
+
+            <div class="input-group">
+                <label for="conversationTopic">Conversation Topic/Issue:</label>
+                <input type="text" id="conversationTopic" placeholder="e.g., roommate problems, dinner plans, work schedules">
+            </div>
+
+            <div class="input-group">
+                <label for="acPersonality">AC Personality Type:</label>
+                <select id="acPersonality">
+                    <option value="angry-defensive">Angry & Defensive (personalizes criticism, victim mentality)</option>
+                    <option value="passive-aggressive">Passive-Aggressive (indirect anger, subtle blame)</option>
+                    <option value="needy-dependent">Needy & Dependent (clingy, seeks constant validation)</option>
+                    <option value="rigid-controlling">Rigid & Controlling (must be right, inflexible)</option>
+                    <option value="deflecting-blaming">Deflecting & Blaming (external blame, avoids responsibility)</option>
+                    <option value="victim-mentality">Victim Mentality (always wronged, self-pity)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="acOpeningLine">AC's Opening Line:</label>
+                <input type="text" id="acOpeningLine" placeholder="e.g., How's that roomie situation going? Probably different than mine.">
+            </div>
+
+            <div class="input-group">
+                <label for="userRole">Your Role in This Scenario:</label>
+                <input type="text" id="userRole" placeholder="e.g., college student, spouse, coworker, sibling">
+            </div>
+
+            <button class="btn-primary" onclick="testAPIKeys()" style="width: 48%; margin: 5px;">
+                🧪 Test API Keys
+            </button>
+            <button class="btn-primary" onclick="startVoiceTraining()" style="width: 48%; margin: 5px;">
+                🎤 Start Voice Training
+            </button>
+        </div>
+
+        <!-- Voice Interface -->
+        <div class="voice-interface" id="voiceInterface">
+            <!-- Scenario Info -->
+            <div class="scenario-info" id="scenarioInfo">
+                <h4 id="scenarioTitle">🎭 Scenario: [Will be set when you start]</h4>
+                <p><strong>Your Role:</strong> <span id="userRoleDisplay">[Will be set when you start]</span></p>
+                <p><strong>AC Type:</strong> <span id="acPersonalityDisplay">[Will be set when you start]</span></p>
+                <p><strong>Topic:</strong> <span id="topicDisplay">[Will be set when you start]</span></p>
+                <p><strong>Coach Role:</strong> Friendly advisor teaching conversation skills</p>
+            </div>
+
+            <!-- Status Display -->
+            <div class="status" id="status" style="display: none;"></div>
+
+            <!-- Conversation Stage -->
+            <div class="conversation-stage" id="conversationStage"></div>
+
+            <!-- Conversation Display -->
+            <div class="conversation-display" id="conversationDisplay">
+                <div id="messages"></div>
+            </div>
+
+            <!-- Voice Control -->
+            <button class="voice-control" id="voiceButton" onclick="handleVoiceInteraction()">
+                🎤
+            </button>
+
+            <!-- Voice Level Indicator -->
+            <div class="voice-level">
+                <div class="voice-level-bar" id="voiceLevelBar"></div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions">
+                <p><strong>🎤 Voice Instructions:</strong></p>
+                <p>• Click the microphone to record your response</p>
+                <p>• Speak clearly when the button turns red</p>
+                <p>• Click again to stop recording and process</p>
+                <p>• Wait for AI response before speaking again</p>
+                <p><strong>🐛 Debugging:</strong> Check browser console (F12) for detailed error logs</p>
+            </div>
+
+            <!-- Emergency Text Input for Testing -->
+            <div class="instructions" style="background: #fff3cd; border-color: #ffeaa7;">
+                <p><strong>🚨 Voice Not Working?</strong></p>
+                <p>1. Press F12 to open browser console and check for errors</p>
+                <p>2. To test conversation without voice, type in console:</p>
+                <p><code>handleUserResponse("your message here")</code></p>
+                <p>3. Check that all API keys are working with the "Test API Keys" button</p>
+            </div>
+
+            <button class="btn-danger" onclick="endTraining()">🛑 End Training</button>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let trainingState = {
+            stage: 'initial', // initial, lesson1, lesson2, lesson3, final
+            currentRole: 'ac', // ac or coach
+            exchangeCount: 0,
+            userName: '',
+            isRecording: false,
+            isProcessing: false,
+            isSpeaking: false,
+            conversationHistory: [],
+            mediaRecorder: null,
+            audioChunks: [],
+            scenario: {
+                relationshipType: '',
+                conversationTopic: '',
+                acPersonality: '',
+                acOpeningLine: '',
+                userRole: ''
+            }
+        }
+
+        // Test API keys function
+        async function testAPIKeys() {
+            // Get API keys
+            apiKeys.claude = document.getElementById('claudeApiKey').value;
+            apiKeys.openai = document.getElementById('openaiApiKey').value;
+            apiKeys.elevenLabs = document.getElementById('elevenLabsApiKey').value;
+            voiceIds.ac = document.getElementById('acVoiceId').value;
+
+            if (!apiKeys.claude || !apiKeys.openai || !apiKeys.elevenLabs) {
+                showStatus('Please fill in all API keys first', 'error');
+                return;
+            }
+
+            showStatus('🧪 Testing API connections...', 'info');
+
+            // Test Claude API
+            try {
+                const testResponse = await callClaude('Say "Hello, API test successful!"', 'You are a helpful assistant. Respond exactly as requested.');
+                showStatus('✅ Claude API: Working', 'success');
+            } catch (error) {
+                showStatus('❌ Claude API: Failed - ' + error.message, 'error');
+                return;
+            }
+
+            // Test Eleven Labs API (if voice ID provided)
+            if (voiceIds.ac) {
+                try {
+                    await speakText('API test successful', voiceIds.ac);
+                    showStatus('✅ All APIs working! Ready to start training.', 'success');
+                } catch (error) {
+                    showStatus('❌ Eleven Labs API: Failed - ' + error.message, 'error');
+                }
+            } else {
+                showStatus('✅ Claude & OpenAI working! Add voice ID to test Eleven Labs.', 'success');
+            }
+        };
+
+        let apiKeys = {
+            claude: '',
+            openai: '',
+            elevenLabs: ''
+        };
+
+        let voiceIds = {
+            ac: '',
+            coach: ''
+        };
+
+        // Scenario templates
+        const scenarioTemplates = {
+            'college-roommate': {
+                relationshipType: 'college friends',
+                conversationTopic: 'roommate problems and living situations',
+                acPersonality: 'angry-defensive',
+                acOpeningLine: `Hi {userName}, how's that roomie situation going? Probably different than mine.`,
+                userRole: 'college student'
+            },
+            'spouses-dinner': {
+                relationshipType: 'married couple',
+                conversationTopic: 'dinner plans and cooking responsibilities',
+                acPersonality: 'passive-aggressive',
+                acOpeningLine: `{userName}, I see you're home late again. I guess I'll figure out dinner myself... as usual.`,
+                userRole: 'spouse'
+            },
+            'coworkers-schedule': {
+                relationshipType: 'coworkers',
+                conversationTopic: 'work schedules and shift coverage',
+                acPersonality: 'needy-dependent',
+                acOpeningLine: `{userName}, I really need to talk to you about the schedule. I just don't know what I'm going to do.`,
+                userRole: 'coworker'
+            },
+            'siblings-chores': {
+                relationshipType: 'siblings',
+                conversationTopic: 'household chores and responsibilities',
+                acPersonality: 'victim-mentality',
+                acOpeningLine: `{userName}, I can't believe you left all the dishes for me again. I'm always the one who has to clean up.`,
+                userRole: 'sibling'
+            },
+            'friends-money': {
+                relationshipType: 'close friends',
+                conversationTopic: 'money issues and shared expenses',
+                acPersonality: 'deflecting-blaming',
+                acOpeningLine: `{userName}, about that money I borrowed... well, if you hadn't suggested that expensive restaurant, this wouldn't even be an issue.`,
+                userRole: 'friend'
+            },
+            'manager-employee': {
+                relationshipType: 'manager and employee',
+                conversationTopic: 'workload distribution and deadlines',
+                acPersonality: 'rigid-controlling',
+                acOpeningLine: `{userName}, we need to discuss your recent work. The way you've been handling things isn't meeting my standards.`,
+                userRole: 'employee'
+            }
+        };
+
+        // Personality type descriptions for AI prompting
+        const personalityTypes = {
+            'angry-defensive': {
+                description: 'Angry and defensive - personalizes criticism, has emotional reactivity, victim mentality, external blame patterns',
+                traits: 'gets offended easily, interprets neutral comments as attacks, responds with anger or indignation, deflects blame to others'
+            },
+            'passive-aggressive': {
+                description: 'Passive-aggressive - indirect expression of anger, subtle blame, says one thing but means another',
+                traits: 'makes cutting remarks disguised as concerns, uses sarcasm, gives backhanded compliments, indirect hostility'
+            },
+            'needy-dependent': {
+                description: 'Needy and dependent - seeks constant validation, clingy behavior, emotional dependency',
+                traits: 'constantly seeks reassurance, makes others responsible for their emotions, difficulty making decisions alone'
+            },
+            'rigid-controlling': {
+                description: 'Rigid and controlling - must be right, inflexible thinking, difficulty with compromise',
+                traits: 'insists on their way, all-or-nothing thinking, difficulty acknowledging other perspectives, authoritarian'
+            },
+            'deflecting-blaming': {
+                description: 'Deflecting and blaming - avoids responsibility, external blame patterns, shifts focus to others',
+                traits: 'points to outside factors, redirects conversations away from their role, brings up others\' faults'
+            },
+            'victim-mentality': {
+                description: 'Victim mentality - positions self as wronged party, focuses on how others mistreat them',
+                traits: 'constantly feels persecuted, self-pity, brings up past grievances, cannot see their own role in conflicts'
+            }
+        };
+
+        // Load scenario template
+        function loadScenarioTemplate() {
+            const templateKey = document.getElementById('scenarioTemplate').value;
+            if (!templateKey) {
+                // Hide template notice if no template selected
+                const notice = document.getElementById('templateNotice');
+                if (notice) notice.style.display = 'none';
+                return;
+            }
+            
+            const template = scenarioTemplates[templateKey];
+            if (template) {
+                document.getElementById('relationshipType').value = template.relationshipType;
+                document.getElementById('conversationTopic').value = template.conversationTopic;
+                document.getElementById('acPersonality').value = template.acPersonality;
+                document.getElementById('acOpeningLine').value = template.acOpeningLine;
+                document.getElementById('userRole').value = template.userRole;
+                
+                // Show template notice
+                showTemplateNotice(template);
+            }
+        }
+
+        // Show template notice
+        function showTemplateNotice(template) {
+            let notice = document.getElementById('templateNotice');
+            if (!notice) {
+                notice = document.createElement('div');
+                notice.id = 'templateNotice';
+                notice.className = 'template-notice';
+                document.getElementById('scenarioTemplate').parentNode.appendChild(notice);
+            }
+            
+            notice.innerHTML = `
+                <strong>✅ Template loaded!</strong> You can modify any of these fields below to customize your scenario.
+            `;
+            notice.style.display = 'block';
+        }
+
+        // Corsfix API helper function - EXACT implementation from user
+        async function makeAPICallWithCorsfix(url, options) {
+            try {
+                showStatus(
+                    "Using Corsfix professional service (domain validation)...",
+                    "info"
+                );
+
+                const response = await fetch(`https://proxy.corsfix.com/?${url}`, {
+                    method: options.method || "GET",
+                    headers: {
+                        ...options.headers,
+                        "x-corsfix-headers": JSON.stringify({
+                            Origin: "",
+                        }),
+                    },
+                    body: options.body || null,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} - ${await response.text()}`);
+                }
+
+                return response;
+
+            } catch (error) {
+                showStatus(`Corsfix service error: ${error.message}`, "error");
+                throw error;
+            }
+        }
+
+        // Status display
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 4000);
+            }
+        }
+
+        // Start voice training
+        function startVoiceTraining() {
+            // Get all inputs
+            trainingState.userName = document.getElementById('userName').value;
+            apiKeys.claude = document.getElementById('claudeApiKey').value;
+            apiKeys.openai = document.getElementById('openaiApiKey').value;
+            apiKeys.elevenLabs = document.getElementById('elevenLabsApiKey').value;
+            voiceIds.ac = document.getElementById('acVoiceId').value;
+            voiceIds.coach = document.getElementById('coachVoiceId').value;
+            
+            // Get scenario configuration
+            trainingState.scenario.relationshipType = document.getElementById('relationshipType').value;
+            trainingState.scenario.conversationTopic = document.getElementById('conversationTopic').value;
+            trainingState.scenario.acPersonality = document.getElementById('acPersonality').value;
+            trainingState.scenario.acOpeningLine = document.getElementById('acOpeningLine').value;
+            trainingState.scenario.userRole = document.getElementById('userRole').value;
+
+            // Validate required inputs
+            if (!trainingState.userName || !apiKeys.claude || !apiKeys.openai || !apiKeys.elevenLabs) {
+                showStatus('Please fill in your name and all API keys', 'error');
+                return;
+            }
+
+            // Validate scenario inputs
+            if (!trainingState.scenario.relationshipType || !trainingState.scenario.conversationTopic || 
+                !trainingState.scenario.acPersonality || !trainingState.scenario.acOpeningLine || 
+                !trainingState.scenario.userRole) {
+                showStatus('Please complete all scenario fields', 'error');
+                return;
+            }
+
+            // Update scenario display
+            updateScenarioDisplay();
+
+            // Hide setup, show voice interface
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('voiceInterface').classList.add('active');
+            
+            // Initialize conversation
+            updateConversationStage('🎭 Initial Conversation - AC will greet you');
+            initiateACGreeting();
+        }
+
+        // Update scenario display
+        function updateScenarioDisplay() {
+            const personalityName = personalityTypes[trainingState.scenario.acPersonality]?.description || trainingState.scenario.acPersonality;
+            
+            document.getElementById('scenarioTitle').textContent = `🎭 Scenario: ${trainingState.scenario.relationshipType} discussing ${trainingState.scenario.conversationTopic}`;
+            document.getElementById('userRoleDisplay').textContent = trainingState.scenario.userRole;
+            document.getElementById('acPersonalityDisplay').textContent = personalityName;
+            document.getElementById('topicDisplay').textContent = trainingState.scenario.conversationTopic;
+        }
+
+        // Update conversation stage
+        function updateConversationStage(stage) {
+            document.getElementById('conversationStage').textContent = stage;
+        }
+
+        // Add message to conversation
+        function addMessage(role, content) {
+            const messagesEl = document.getElementById('messages');
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${role}`;
+            
+            const roleMap = {
+                'user': trainingState.userName,
+                'ac': 'AC (College Friend)',
+                'coach': 'Coach'
+            };
+            
+            messageEl.innerHTML = `
+                <div class="role">${roleMap[role]}:</div>
+                <div>${content}</div>
+            `;
+            
+            messagesEl.appendChild(messageEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            
+            // Add to history
+            trainingState.conversationHistory.push({role, content});
+        }
+
+        // Initiate AC greeting
+        async function initiateACGreeting() {
+            try {
+                // Replace {userName} placeholder in opening line
+                const greeting = trainingState.scenario.acOpeningLine.replace('{userName}', trainingState.userName);
+                
+                addMessage('ac', greeting);
+                showStatus('🔊 AC is speaking...', 'info');
+                
+                await speakText(greeting, voiceIds.ac);
+                
+                showStatus('🎤 Your turn to respond - click the microphone', 'info');
+            } catch (error) {
+                showStatus(`Error starting conversation: ${error.message}`, 'error');
+            }
+        }
+
+        // Handle voice interaction
+        async function handleVoiceInteraction() {
+            if (trainingState.isProcessing || trainingState.isSpeaking) {
+                showStatus('Please wait for current operation to complete', 'info');
+                return;
+            }
+
+            if (trainingState.isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        // Start recording
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        sampleRate: 16000,
+                        channelCount: 1,
+                        volume: 1.0
+                    } 
+                });
+                
+                trainingState.mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm'
+                });
+                trainingState.audioChunks = [];
+
+                trainingState.mediaRecorder.ondataavailable = (event) => {
+                    trainingState.audioChunks.push(event.data);
+                };
+
+                trainingState.mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(trainingState.audioChunks, { type: 'audio/webm' });
+                    await processVoiceInput(audioBlob);
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                trainingState.mediaRecorder.start();
+                trainingState.isRecording = true;
+                
+                updateVoiceButton('recording');
+                showStatus('🔴 Recording... Click microphone again to stop', 'info');
+                
+            } catch (error) {
+                showStatus('Microphone access denied or not available', 'error');
+            }
+        }
+
+        // Stop recording
+        function stopRecording() {
+            if (trainingState.mediaRecorder && trainingState.isRecording) {
+                trainingState.mediaRecorder.stop();
+                trainingState.isRecording = false;
+                updateVoiceButton('processing');
+                showStatus('🔄 Processing your speech...', 'info');
+            }
+        }
+
+        // Update voice button appearance
+        function updateVoiceButton(state) {
+            const button = document.getElementById('voiceButton');
+            button.className = 'voice-control';
+            
+            switch(state) {
+                case 'recording':
+                    button.classList.add('recording');
+                    button.textContent = '⏹️';
+                    break;
+                case 'processing':
+                    button.classList.add('processing');
+                    button.textContent = '⚙️';
+                    break;
+                case 'speaking':
+                    button.classList.add('speaking');
+                    button.textContent = '🔊';
+                    break;
+                default:
+                    button.textContent = '🎤';
+            }
+        }
+
+        // Process voice input using Whisper
+        async function processVoiceInput(audioBlob) {
+            trainingState.isProcessing = true;
+            
+            try {
+                // Convert blob to form data for Whisper API
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'audio.webm');
+                formData.append('model', 'whisper-1');
+
+                const response = await makeAPICallWithCorsfix('https://api.openai.com/v1/audio/transcriptions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKeys.openai}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                const transcript = result.text.trim();
+                
+                if (!transcript) {
+                    showStatus('No speech detected. Please try again.', 'error');
+                    updateVoiceButton('default');
+                    trainingState.isProcessing = false;
+                    return;
+                }
+
+                addMessage('user', transcript);
+                await window.handleUserResponse(transcript);
+                
+            } catch (error) {
+                showStatus(`Speech processing error: ${error.message}`, 'error');
+                updateVoiceButton('default');
+                trainingState.isProcessing = false;
+            }
+        }
+
+        // Generate AC response
+        async function generateACResponse(userMessage) {
+            const personality = personalityTypes[trainingState.scenario.acPersonality];
+            
+            const systemPrompt = `You are playing someone in a ${trainingState.scenario.relationshipType} relationship with ${trainingState.userName}. You are discussing ${trainingState.scenario.conversationTopic}. Your personality type is ${personality.description}. Your behavioral traits include: ${personality.traits}. 
+
+            Follow these guidelines:
+            - Keep responses to 40-65 words maximum
+            - Speak in a natural, conversational manner appropriate for this relationship
+            - Sometimes be hesitant, use incomplete sentences or phrases
+            - Show the emotional patterns typical of your personality type
+            - The conversation should escalate slightly with each exchange
+            - Stay focused on the topic: ${trainingState.scenario.conversationTopic}`;
+            
+            const prompt = `${trainingState.userName} (${trainingState.scenario.userRole}) just said: "${userMessage}". Respond as the activated character showing your personality traits more prominently. This is exchange number ${trainingState.exchangeCount}.`;
+            
+            return await callClaude(prompt, systemPrompt);
+        }
+
+        // Generate Coach response  
+        async function generateCoachResponse(userMessage) {
+            let systemPrompt = '';
+            let prompt = '';
+            const scenarioContext = `${trainingState.scenario.relationshipType} discussing ${trainingState.scenario.conversationTopic}`;
+
+            switch(trainingState.stage) {
+                case 'lesson1':
+                    systemPrompt = `You are the Coach helping ${trainingState.userName} learn to manage difficult conversations. You are friendly and straightforward. The scenario involves ${scenarioContext} where the AC is showing ${personalityTypes[trainingState.scenario.acPersonality].description}. You should introduce Lesson 1: Stop and monitor yourself when getting emotional or defensive. Offer to show them a video about this lesson. Keep it to 40-65 words.`;
+                    prompt = `The conversation between ${trainingState.userName} and the AC has gotten tense in this ${scenarioContext} situation. Explain what happened and introduce Lesson 1. Ask if they want to watch the video.`;
+                    break;
+                case 'lesson2':
+                    systemPrompt = `You are the Coach. ${trainingState.userName} has completed Lesson 1 in the ${scenarioContext} scenario. Now introduce Lesson 2: Be curious, examine your own behavior, seek confirmation. Offer the video for Lesson 2. Keep it to 40-65 words.`;
+                    prompt = `Evaluate how ${trainingState.userName} did with Lesson 1 and introduce Lesson 2. Ask if they want to watch the video.`;
+                    break;
+                case 'lesson3':
+                    systemPrompt = `You are the Coach. ${trainingState.userName} has completed Lesson 2 in the ${scenarioContext} scenario. Now introduce Lesson 3: Acknowledge your emotional reaction and turn toward joint repair of the relationship. Keep it to 40-65 words.`;
+                    prompt = `Evaluate how ${trainingState.userName} did with Lesson 2 and introduce Lesson 3. Ask if they want to watch the video.`;
+                    break;
+                default:
+                    systemPrompt = `You are the Coach providing guidance to ${trainingState.userName} about managing the difficult conversation they just had in this ${scenarioContext} situation. Keep it to 40-65 words.`;
+                    prompt = `${trainingState.userName} said: "${userMessage}". Provide appropriate coaching guidance.`;
+            }
+
+            return await callClaude(prompt, systemPrompt);
+        }
+
+        // Call Claude API
+        async function callClaude(prompt, systemPrompt) {
+            try {
+                const requestBody = {
+                    model: 'claude-3-5-sonnet-20241022',
+                    max_tokens: 150,
+                    system: systemPrompt,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ]
+                };
+
+                const response = await makeAPICallWithCorsfix('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKeys.claude,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(`Claude API error: ${data.error.message}`);
+                }
+
+                if (!data.content || !data.content[0] || !data.content[0].text) {
+                    throw new Error('Invalid response format from Claude API');
+                }
+
+                return data.content[0].text;
+            } catch (error) {
+                showStatus(`Claude API error: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // Text-to-speech
+        async function speakText(text, voiceId) {
+            if (!voiceId || !apiKeys.elevenLabs) {
+                showStatus('Voice synthesis skipped - missing voice ID or API key', 'info');
+                return;
+            }
+
+            trainingState.isSpeaking = true;
+            updateVoiceButton('speaking');
+
+            try {
+                const requestBody = {
+                    text: text,
+                    model_id: 'eleven_monolingual_v1',
+                    voice_settings: {
+                        stability: 0.5,
+                        similarity_boost: 0.5
+                    }
+                };
+
+                const response = await makeAPICallWithCorsfix(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'xi-api-key': apiKeys.elevenLabs
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const audioBlob = await response.blob();
+
+                if (audioBlob.size === 0) {
+                    throw new Error('Empty audio response from Eleven Labs');
+                }
+
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                
+                audio.onended = () => {
+                    trainingState.isSpeaking = false;
+                    updateVoiceButton('default');
+                    URL.revokeObjectURL(audioUrl);
+                };
+                audio.onerror = (e) => {
+                    trainingState.isSpeaking = false;
+                    updateVoiceButton('default');
+                    showStatus('Audio playback failed', 'error');
+                };
+                
+                await audio.play();
+                
+            } catch (error) {
+                trainingState.isSpeaking = false;
+                updateVoiceButton('default');
+                showStatus(`Text-to-speech error: ${error.message}`, 'error');
+            }
+        }
+
+        // Determine if should switch to Coach
+        function shouldSwitchToCoach() {
+            // Switch to coach after 4 AC exchanges initially
+            if (trainingState.stage === 'initial' && trainingState.exchangeCount >= 4) {
+                return true;
+            }
+            
+            // Add other switching logic based on lesson progression
+            return false;
+        }
+
+        // Get next stage
+        function getNextStage() {
+            switch(trainingState.stage) {
+                case 'initial': return 'lesson1';
+                case 'lesson1': return 'lesson2';
+                case 'lesson2': return 'lesson3';
+                case 'lesson3': return 'final';
+                default: return 'initial';
+            }
+        }
+
+        // End training
+        function endTraining() {
+            if (trainingState.mediaRecorder && trainingState.isRecording) {
+                trainingState.mediaRecorder.stop();
+            }
+            location.reload();
+        }
+    </script>
+</body>
+</html>
